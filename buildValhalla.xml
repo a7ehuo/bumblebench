@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+
+<!--
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+	    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+This is a build.xml which executes the main openjdk.build build.xml 
+to allow tools which invoke a root level build.xml file to 
+execute a build.
+-->
+
+<project name="net.adoptopenjdk.bumblebench" default="dist" basedir=".">
+	<!--taskdef resource='net/sf/antcontrib/antlib.xml'/-->
+	<description>
+       Compile net.adoptopenjdk.bumblebench
+    </description>
+
+	<property name="dist" value="${basedir}"/>
+	<property name="src-core" value="${basedir}/net/adoptopenjdk/bumblebench/core"/>
+	<property name="src-valhalla" value="${basedir}/net/adoptopenjdk/bumblebench/valhalla"/>
+
+	<target name="compile-all" description="compile" >
+
+		<!-- core -->
+		<javac srcdir="${src-core}" 
+             fork="true"
+             destdir=""
+             debug="on"
+             source="1.8"
+             target="1.8"
+             includeantruntime="false"
+             excludes="">
+		</javac>
+		<javac srcdir="${src-core}" 
+             fork="true"
+             destdir=""
+             debug="on"
+             source="1.8"
+             target="1.8"
+             includeantruntime="false"
+             includes="**/ParallelBench.java">
+		</javac>
+
+		<!-- valhalla -->
+		<javac srcdir="${src-valhalla}"
+             fork="true"
+             destdir=""
+             debug="on"
+             includeantruntime="false">
+             <compilerarg value="-XDallowWithFieldOperator" />
+		</javac>
+	</target>
+
+	<!-- Create BumbleBenchValhalla.jar and clean up -->
+	<target name="dist" depends="compile-all" description="Generate the jar file" >
+		<exec executable="bash">
+			<arg value="-c" />
+			<arg value="rm -f BumbleBenchValhalla.jar" />
+		</exec>
+		
+		<jar jarfile="${dist}/BumbleBenchValhalla.jar" filesonly="true">
+			<fileset dir="${basedir}"
+					excludes="**/asm-all-4.0.jar,**/Makefile,**/*.mk, **/build.xml. **/.project">
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="net.adoptopenjdk.bumblebench.core.Launcher"/>
+			</manifest>
+		</jar>
+
+		<delete>
+			<fileset dir="." includes="**/*.class"/>
+		</delete>
+	</target>
+</project>
