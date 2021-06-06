@@ -17,51 +17,36 @@ package net.adoptopenjdk.bumblebench.valhalla;
 import net.adoptopenjdk.bumblebench.core.MicroBench;
 import java.util.Random;
 
-public final class ArrayMixedBench extends MicroBench{
+public final class ArrayIdentityBench extends MicroBench{
    private static int NUM_ARRAY = 10;
-   private static int ARRAY_LENGTH = 2;
-   private static int PRIMITIVE_ARRAY_INDEX = NUM_ARRAY - 1;
+   private static int ARRAY_LENGTH = 10;
    private static Object[][] data;
    Random random = newRandom();
 
    static {
       data = new Object[NUM_ARRAY][ARRAY_LENGTH];
 
-      for (int i=0; i < PRIMITIVE_ARRAY_INDEX; i++) {
+      for (int i=0; i < NUM_ARRAY; i++) {
          data[i] = new Object[ARRAY_LENGTH];
          for (int j=0; j < data[i].length; j++) {
             data[i][j] = new Object();
 	      }
       }
-
-      data[PRIMITIVE_ARRAY_INDEX] = new PrimitiveClass[ARRAY_LENGTH];
-      for (int j=0; j < data[PRIMITIVE_ARRAY_INDEX].length; j++) {
-         data[PRIMITIVE_ARRAY_INDEX][j] = new PrimitiveClass();
-      }
    }
 
    @Override
    protected long doBatch(long numIterations) throws InterruptedException {
-      long numIterForIdentity = (new Double(numIterations * 0.9999)).longValue();
-      // make sure the primitive array is picked at least once in each batch
-      numIterForIdentity = (numIterForIdentity >= numIterations) ? (numIterations - 1) : numIterForIdentity;
       int index1 = 0;
       int index2 = 0;
       int index3 = 0;
 
       for (long loop = 0; loop < numIterations; loop++) {
-        if (loop < numIterForIdentity) {
-            index1 = random.nextInt((int)(loop + 1)) % PRIMITIVE_ARRAY_INDEX;
-            index2 = random.nextInt((int)(loop + 1)) % PRIMITIVE_ARRAY_INDEX;
-        }
-        else {
-            index1 = PRIMITIVE_ARRAY_INDEX;
-            index2 = PRIMITIVE_ARRAY_INDEX;
-        }
-        index3 = random.nextInt((int)(loop + 1)) % ARRAY_LENGTH;
+         index1 = random.nextInt((int)(loop + 1)) % NUM_ARRAY;
+         index2 = random.nextInt((int)(loop + 1)) % NUM_ARRAY;
+         index3 = random.nextInt((int)(loop + 1)) % ARRAY_LENGTH;
 
-        data[index1][index3] = data[index2][index3];
-      }
+         data[index1][index3] = data[index2][index3];
+         }
       return numIterations;
    }
 }
